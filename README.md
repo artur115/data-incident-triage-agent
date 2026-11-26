@@ -92,7 +92,7 @@ step recordable for the eval.
 ```bash
 pip install -r requirements.txt
 make demo            # tests, runbook baseline, agent replay
-make record LIMIT=5  # real agent run on 5 incidents to check cost; needs ANTHROPIC_API_KEY
+make record LIMIT=5  # real agent run on 5 incidents to check cost; needs PROOF_ANTHROPIC_API_KEY
 make record          # all 48
 ```
 
