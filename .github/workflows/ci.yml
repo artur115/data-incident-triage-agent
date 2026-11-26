@@ -1,0 +1,28 @@
+name: triage evals
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Unit tests (tools are read-only, labels hold, policy gate, scoring)
+        run: python -m pytest -q
+      - name: Runbook baseline on all 48 incidents
+        run: python -m triage.evaluate --triager runbook
+      - name: Agent, replayed from recorded responses; fails if it ever closes a real problem
+        run: |
+          if ls recordings/*.json >/dev/null 2>&1; then
+            python -m triage.evaluate --triager agent --mode replay
+            python -c "import json,sys; s=json.load(open('report/scorecard_agent.json'))['summary']; print(s); sys.exit(1 if s['real_problems_closed'] or s['bad_reloads'] else 0)"
+          else
+            echo "No recordings committed yet; skipping the agent replay."
+          fi
